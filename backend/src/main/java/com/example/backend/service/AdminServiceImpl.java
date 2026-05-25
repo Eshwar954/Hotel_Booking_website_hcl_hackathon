@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.backend.dto.BookingDto;
 import com.example.backend.dto.RoomDto;
+import com.example.backend.dto.UserDto;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.model.Booking;
 import com.example.backend.model.Room;
@@ -18,133 +19,105 @@ import com.example.backend.repository.UserRepository;
 
 @Service
 public class AdminServiceImpl
-		implements AdminService {
+        implements AdminService {
 
-	private final BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
 
-	private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-	private final RoomRepository roomRepository;
+    private final RoomRepository roomRepository;
 
-	public AdminServiceImpl(
-			BookingRepository bookingRepository,
-			UserRepository userRepository,
-			RoomRepository roomRepository) {
+    public AdminServiceImpl(
+            BookingRepository bookingRepository,
+            UserRepository userRepository,
+            RoomRepository roomRepository) {
 
-		this.bookingRepository = bookingRepository;
+        this.bookingRepository = bookingRepository;
+        this.userRepository = userRepository;
+        this.roomRepository = roomRepository;
+    }
 
-		this.userRepository = userRepository;
+    @Override
+    public Object getDashboard() {
+        long rooms = roomRepository.count();
+        long bookings = bookingRepository.count();
+        long users = userRepository.count();
 
-		this.roomRepository = roomRepository;
-	}
+        return Map.of(
+                "rooms", rooms,
+                "bookings", bookings,
+                "users", users);
+    }
 
-	@Override
-	public Object getDashboard() {
+    @Override
+    public List<BookingDto> listBookings() {
+        return bookingRepository
+                .findAll()
+                .stream()
+                .map(this::mapToBookingDto)
+                .collect(Collectors.toList());
+    }
 
-		long rooms = roomRepository.count();
+    @Override
+    public List<UserDto> listUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToUserDto)
+                .collect(Collectors.toList());
+    }
 
-		long bookings = bookingRepository.count();
+    @Override
+    public RoomDto updateRoomAvailability(
+            Long roomId,
+            Integer onlineAvailableRooms) {
 
-		long users = userRepository.count();
+        Room room = roomRepository
+                .findById(roomId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Room",
+                        "id",
+                        roomId));
 
-		return Map.of(
-				"rooms", rooms,
-				"bookings", bookings,
-				"users", users);
-	}
+        room.setOnlineAvailableRooms(
+                onlineAvailableRooms);
 
-	@Override
-	public List<BookingDto> listBookings() {
+        Room saved = roomRepository.save(room);
+        return mapToRoomDto(saved);
+    }
 
-		return bookingRepository
-				.findAll()
-				.stream()
-				.map(this::mapToBookingDto)
-				.collect(Collectors.toList());
-	}
+    private BookingDto mapToBookingDto(
+            Booking booking) {
 
-	@Override
-	public List<User> listUsers() {
-		return userRepository.findAll();
-	}
+        BookingDto dto = new BookingDto();
+        dto.setBookingId(booking.getBookingId());
+        dto.setUserId(booking.getUser().getUserId());
+        dto.setRoomId(booking.getRoom().getRoomId());
+        dto.setCheckInDate(booking.getCheckInDate());
+        dto.setCheckOutDate(booking.getCheckOutDate());
+        dto.setTotalPrice(booking.getTotalPrice());
+        dto.setStatus(booking.getStatus());
+        return dto;
+    }
 
-	@Override
-	public RoomDto updateRoomAvailability(
-			Long roomId,
-			Integer onlineAvailableRooms) {
+    private UserDto mapToUserDto(User user) {
+        UserDto dto = new UserDto();
+        dto.setUserId(user.getUserId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole());
+        return dto;
+    }
 
-		Room room = roomRepository
-				.findById(roomId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						"Room",
-						"id",
-						roomId));
+    private RoomDto mapToRoomDto(
+            Room room) {
 
-		room.setOnlineAvailableRooms(
-				onlineAvailableRooms);
-
-		Room saved = roomRepository.save(room);
-
-		return mapToRoomDto(saved);
-	}
-
-	private BookingDto mapToBookingDto(
-			Booking booking) {
-
-		BookingDto dto = new BookingDto();
-
-		dto.setBookingId(
-				booking.getBookingId());
-
-		dto.setUserId(
-				booking.getUser()
-						.getUserId());
-
-		dto.setRoomId(
-				booking.getRoom()
-						.getRoomId());
-
-		dto.setCheckInDate(
-				booking.getCheckInDate()
-						.toString());
-
-		dto.setCheckOutDate(
-				booking.getCheckOutDate()
-						.toString());
-
-		dto.setTotalPrice(
-				booking.getTotalPrice());
-
-		dto.setStatus(
-				booking.getStatus());
-
-		return dto;
-	}
-
-	private RoomDto mapToRoomDto(
-			Room room) {
-
-		RoomDto dto = new RoomDto();
-
-		dto.setRoomId(
-				room.getRoomId());
-
-		dto.setHotelId(
-				room.getHotel()
-						.getHotelId());
-
-		dto.setRoomType(
-				room.getRoomType());
-
-		dto.setPrice(
-				room.getPrice());
-
-		dto.setOnlineAvailableRooms(
-				room.getOnlineAvailableRooms());
-
-		dto.setDescription(
-				room.getDescription());
-
-		return dto;
-	}
+        RoomDto dto = new RoomDto();
+        dto.setRoomId(room.getRoomId());
+        dto.setHotelId(room.getHotel().getHotelId());
+        dto.setRoomType(room.getRoomType());
+        dto.setPrice(room.getPrice());
+        dto.setOnlineAvailableRooms(room.getOnlineAvailableRooms());
+        dto.setDescription(room.getDescription());
+        return dto;
+    }
 }

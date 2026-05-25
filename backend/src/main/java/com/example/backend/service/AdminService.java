@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.example.backend.dto.BookingDto;
 import com.example.backend.dto.RoomDto;
-import com.example.backend.model.User;
+import com.example.backend.dto.UserDto;
 
 public interface AdminService {
 
@@ -12,7 +12,7 @@ public interface AdminService {
 
     List<BookingDto> listBookings();
 
-    List<User> listUsers();
+    List<UserDto> listUsers();
 
-    RoomDto updateRoomAvailability(Long roomId,Integer onlineAvailableRooms);
+    RoomDto updateRoomAvailability(Long roomId, Integer onlineAvailableRooms);
 }

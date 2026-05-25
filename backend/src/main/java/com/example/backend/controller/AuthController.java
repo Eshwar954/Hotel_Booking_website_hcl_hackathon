@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.dto.ApiResponseDto;
 import com.example.backend.dto.LoginRequestDto;
+import com.example.backend.dto.PasswordResetRequestDto;
 import com.example.backend.dto.RegisterRequestDto;
 import com.example.backend.dto.AuthResponseDto;
 import com.example.backend.service.AuthService;
@@ -29,6 +31,13 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDto> register(@RequestBody RegisterRequestDto dto) {
         return ResponseEntity.ok(authService.register(dto));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponseDto> forgotPassword(@RequestBody PasswordResetRequestDto dto) {
+        ApiResponseDto response = new ApiResponseDto();
+        response.setMessage(authService.forgotPassword(dto));
+        return ResponseEntity.ok(response);
     }
 }
 

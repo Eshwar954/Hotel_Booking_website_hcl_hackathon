@@ -8,11 +8,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.dto.ApiResponseDto;
 import com.example.backend.dto.BookingDto;
+import com.example.backend.repository.UserRepository;
 import com.example.backend.service.BookingService;
 
 @RestController
@@ -20,13 +23,19 @@ import com.example.backend.service.BookingService;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final UserRepository userRepository;
 
-    public BookingController(BookingService bookingService) {
+    public BookingController(BookingService bookingService, UserRepository userRepository) {
         this.bookingService = bookingService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping
-    public ResponseEntity<BookingDto> createBooking(@RequestBody BookingDto dto) {
+    public ResponseEntity<BookingDto> createBooking(@RequestBody BookingDto dto, Principal principal) {
+        Long userId = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+        dto.setUserId(userId);
         return ResponseEntity.ok(bookingService.createBooking(dto));
     }
 
@@ -35,9 +44,32 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getMyBookings(principal.getName()));
     }
 
+    @GetMapping("/my-bookings")
+    public ResponseEntity<List<BookingDto>> myBookingsAlias(Principal principal) {
+        return ResponseEntity.ok(bookingService.getMyBookings(principal.getName()));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<BookingDto>> listBookings() {
+        return ResponseEntity.ok(bookingService.listBookings());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<BookingDto> getBooking(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.getBooking(id));
+    }
+
+    @PutMapping("/status/{id}")
+    public ResponseEntity<BookingDto> updateStatus(@PathVariable Long id, @RequestBody BookingDto dto) {
+        return ResponseEntity.ok(bookingService.updateBookingStatus(id, dto.getStatus()));
+    }
+
+    @PostMapping("/cancel/{id}")
+    public ResponseEntity<ApiResponseDto> cancelBooking(@PathVariable Long id) {
+        bookingService.updateBookingStatus(id, "CANCELLED");
+        ApiResponseDto response = new ApiResponseDto();
+        response.setMessage("Booking cancelled successfully");
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

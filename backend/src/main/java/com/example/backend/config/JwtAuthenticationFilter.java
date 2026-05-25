@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter
                         .getAuthentication() == null) {
 
             User user = userRepository
-                    .findbyEmail(email)
+                    .findByEmail(email)
                     .orElse(null);
 
             if (user != null) {

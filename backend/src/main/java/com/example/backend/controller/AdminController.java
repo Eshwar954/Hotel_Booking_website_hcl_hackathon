@@ -6,12 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.BookingDto;
 import com.example.backend.dto.RoomDto;
-import com.example.backend.model.User;
+import com.example.backend.dto.UpdateRoomAvailabilityDto;
+import com.example.backend.dto.UserDto;
 import com.example.backend.service.AdminService;
 
 @RestController
@@ -35,13 +37,19 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> users() {
+    public ResponseEntity<List<UserDto>> users() {
         return ResponseEntity.ok(adminService.listUsers());
     }
 
     @PutMapping("/rooms/{roomId}/availability")
-    public ResponseEntity<RoomDto> setRoomAvailability(@PathVariable Long roomId) {
-        RoomDto dto = adminService.setRoomAvailability(roomId, true);
+    public ResponseEntity<RoomDto> setRoomAvailability(
+            @PathVariable Long roomId,
+            @RequestBody UpdateRoomAvailabilityDto updateDto) {
+
+        RoomDto dto = adminService.updateRoomAvailability(
+                roomId,
+                updateDto.getOnlineAvailableRooms());
+
         return ResponseEntity.ok(dto);
     }
 }

@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 import com.example.backend.config.JwtService;
 import com.example.backend.dto.AuthResponseDto;
 import com.example.backend.dto.LoginRequestDto;
+import com.example.backend.dto.PasswordResetRequestDto;
 import com.example.backend.dto.RegisterRequestDto;
 import com.example.backend.exception.UnauthorizedException;
+import com.example.backend.model.Role;
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
 
@@ -59,16 +61,12 @@ public class AuthServiceImpl
                 passwordEncoder.encode(
                         dto.getPassword()));
 
-        user.setRole("USER");
+        user.setRole(Role.USER);
 
         User savedUser = userRepository.save(user);
 
-        String token = jwtService.generateToken(
-                savedUser.getEmail());
-
-        return new AuthResponseDto(
-                token,
-                savedUser.getRole(),
+        return buildAuthResponse(
+                savedUser,
                 "Registration successful");
     }
 
@@ -91,12 +89,40 @@ public class AuthServiceImpl
                     "Invalid email or password");
         }
 
-        String token = jwtService.generateToken(
-                user.getEmail());
-
-        return new AuthResponseDto(
-                token,
-                user.getRole(),
+        return buildAuthResponse(
+                user,
                 "Login successful");
+    }
+
+    @Override
+    public String forgotPassword(
+            PasswordResetRequestDto dto) {
+
+        User user = userRepository
+                .findByEmail(dto.getEmail())
+                .orElseThrow(() -> new UnauthorizedException(
+                        "No account found for this email"));
+
+        user.setPassword(
+                passwordEncoder.encode(
+                        dto.getNewPassword()));
+
+        userRepository.save(user);
+
+        return "Password updated successfully";
+    }
+
+    private AuthResponseDto buildAuthResponse(
+            User user,
+            String message) {
+
+        AuthResponseDto response = new AuthResponseDto();
+        response.setUserId(user.getUserId());
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        response.setToken(jwtService.generateToken(user.getEmail()));
+        response.setRole(user.getRole().name());
+        response.setMessage(message);
+        return response;
     }
 }

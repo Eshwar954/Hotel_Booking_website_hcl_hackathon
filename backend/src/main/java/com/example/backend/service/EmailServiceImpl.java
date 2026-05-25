@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -12,10 +13,10 @@ public class EmailServiceImpl
             mailSender;
 
     public EmailServiceImpl(
-            JavaMailSender mailSender
+            ObjectProvider<JavaMailSender> mailSenderProvider
     ) {
         this.mailSender =
-                mailSender;
+                mailSenderProvider.getIfAvailable();
     }
 
     @Override
@@ -24,6 +25,10 @@ public class EmailServiceImpl
             String subject,
             String content
     ) {
+
+        if (mailSender == null) {
+            return;
+        }
 
         SimpleMailMessage message =
                 new SimpleMailMessage();

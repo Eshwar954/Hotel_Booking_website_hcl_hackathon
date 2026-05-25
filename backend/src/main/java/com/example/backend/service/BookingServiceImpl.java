@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,166 +17,167 @@ import com.example.backend.repository.RoomRepository;
 import com.example.backend.repository.UserRepository;
 
 @Service
-public class BookingServiceImpl
-		implements BookingService {
+public class BookingServiceImpl implements BookingService {
 
-	private final BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
 
-	private final UserRepository userRepository;
+    public BookingServiceImpl(
+            BookingRepository bookingRepository,
+            UserRepository userRepository,
+            RoomRepository roomRepository) {
 
-	private final RoomRepository roomRepository;
+        this.bookingRepository = bookingRepository;
+        this.userRepository = userRepository;
+        this.roomRepository = roomRepository;
+    }
 
-	public BookingServiceImpl(
-			BookingRepository bookingRepository,
-			UserRepository userRepository,
-			RoomRepository roomRepository) {
+    @Override
+    @Transactional
+    public BookingDto createBooking(BookingDto dto) {
 
-		this.bookingRepository = bookingRepository;
+        User user = userRepository
+                .findById(dto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User",
+                        "id",
+                        dto.getUserId()));
 
-		this.userRepository = userRepository;
+        Room room = roomRepository
+                .findById(dto.getRoomId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Room",
+                        "id",
+                        dto.getRoomId()));
 
-		this.roomRepository = roomRepository;
-	}
+        if (room.getOnlineAvailableRooms() == null || room.getOnlineAvailableRooms() <= 0) {
+            throw new RuntimeException("No rooms available");
+        }
 
-	@Override
-	@Transactional
-	public BookingDto createBooking(
-			BookingDto dto) {
+        Booking booking = new Booking();
+        booking.setUser(user);
+        booking.setRoom(room);
+        booking.setCheckInDate(dto.getCheckInDate());
+        booking.setCheckOutDate(dto.getCheckOutDate());
+        booking.setTotalPrice(resolveTotalPrice(dto, room));
+        booking.setStatus("CONFIRMED");
 
-		User user = userRepository
-				.findById(
-						dto.getUserId())
-				.orElseThrow(() -> new ResourceNotFoundException(
-						"User",
-						"id",
-						dto.getUserId()));
+        Booking savedBooking = bookingRepository.save(booking);
 
-		Room room = roomRepository
-				.findById(
-						dto.getRoomId())
-				.orElseThrow(() -> new ResourceNotFoundException(
-						"Room",
-						"id",
-						dto.getRoomId()));
+        room.setOnlineAvailableRooms(room.getOnlineAvailableRooms() - 1);
+        roomRepository.save(room);
 
-		if (room.getOnlineAvailableRooms() <= 0) {
+        return mapToDto(savedBooking);
+    }
 
-			throw new RuntimeException(
-					"No rooms available");
-		}
+    @Override
+    public List<BookingDto> getMyBookings(String email) {
 
-		Booking booking = new Booking();
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-		booking.setUser(user);
+        return bookingRepository
+                .findByUser(user)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
 
-		booking.setRoom(room);
+    @Override
+    public List<BookingDto> listBookings() {
+        return bookingRepository
+                .findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
 
-		booking.setCheckInDate(
-				dto.getCheckInDate());
+    @Override
+    public BookingDto getBooking(Long id) {
 
-		booking.setCheckOutDate(
-				dto.getCheckOutDate());
+        Booking booking = bookingRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Booking",
+                        "id",
+                        id));
 
-		booking.setTotalPrice(
-				dto.getTotalPrice());
+        return mapToDto(booking);
+    }
 
-		booking.setStatus(
-				"CONFIRMED");
+    @Override
+    @Transactional
+    public BookingDto updateBookingStatus(Long id, String status) {
 
-		Booking savedBooking = bookingRepository
-				.save(booking);
+        Booking booking = bookingRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Booking",
+                        "id",
+                        id));
 
-		room.setOnlineAvailableRooms(
-				room.getOnlineAvailableRooms()
-						- 1);
+        String normalizedStatus = status == null
+                ? booking.getStatus()
+                : status.trim().toUpperCase();
 
-		roomRepository.save(room);
+        if ("CANCELLED".equals(normalizedStatus)
+                && !"CANCELLED".equalsIgnoreCase(booking.getStatus())) {
+            Room room = booking.getRoom();
+            room.setOnlineAvailableRooms(room.getOnlineAvailableRooms() + 1);
+            roomRepository.save(room);
+        }
 
-		return mapToDto(savedBooking);
-	}
+        booking.setStatus(normalizedStatus);
+        return mapToDto(bookingRepository.save(booking));
+    }
 
-	@Override
-	public List<BookingDto> getMyBookings(
-			String email) {
+    @Override
+    @Transactional
+    public void deleteBooking(Long id) {
 
-		User user = userRepository
-				.findByEmail(email)
-				.orElseThrow(() -> new RuntimeException(
-						"User not found"));
+        Booking booking = bookingRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Booking",
+                        "id",
+                        id));
 
-		return bookingRepository
-				.findByUser(user)
-				.stream()
-				.map(this::mapToDto)
-				.collect(Collectors.toList());
-	}
+        Room room = booking.getRoom();
+        room.setOnlineAvailableRooms(room.getOnlineAvailableRooms() + 1);
+        roomRepository.save(room);
 
-	@Override
-	public BookingDto getBooking(
-			Long id) {
+        bookingRepository.delete(booking);
+    }
 
-		Booking booking = bookingRepository
-				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						"Booking",
-						"id",
-						id));
+    private double resolveTotalPrice(BookingDto dto, Room room) {
+        if (dto.getTotalPrice() != null) {
+            return dto.getTotalPrice();
+        }
 
-		return mapToDto(booking);
-	}
+        long nights = Math.max(
+                1,
+                ChronoUnit.DAYS.between(dto.getCheckInDate(), dto.getCheckOutDate()));
 
-	@Override
-	@Transactional
-	public void deleteBooking(
-			Long id) {
+        return room.getPrice() * nights;
+    }
 
-		Booking booking = bookingRepository
-				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						"Booking",
-						"id",
-						id));
+    private BookingDto mapToDto(Booking booking) {
 
-		Room room = booking.getRoom();
-
-		room.setOnlineAvailableRooms(
-				room.getOnlineAvailableRooms()
-						+ 1);
-
-		roomRepository.save(room);
-
-		bookingRepository.delete(
-				booking);
-	}
-
-	private BookingDto mapToDto(
-			Booking booking) {
-
-		BookingDto dto = new BookingDto();
-
-		dto.setBookingId(
-				booking.getBookingId());
-
-		dto.setUserId(
-				booking.getUser()
-						.getUserId());
-
-		dto.setRoomId(
-				booking.getRoom()
-						.getRoomId());
-
-		dto.setCheckInDate(
-				booking.getCheckInDate());
-
-		dto.setCheckOutDate(
-				booking.getCheckOutDate());
-
-		dto.setTotalPrice(
-				booking.getTotalPrice());
-
-		dto.setStatus(
-				booking.getStatus());
-
-		return dto;
-	}
+        BookingDto dto = new BookingDto();
+        dto.setBookingId(booking.getBookingId());
+        dto.setUserId(booking.getUser().getUserId());
+        dto.setRoomId(booking.getRoom().getRoomId());
+        dto.setCheckInDate(booking.getCheckInDate());
+        dto.setCheckOutDate(booking.getCheckOutDate());
+        dto.setTotalPrice(booking.getTotalPrice());
+        dto.setStatus(booking.getStatus());
+        dto.setUserName(booking.getUser().getName());
+        dto.setUserEmail(booking.getUser().getEmail());
+        dto.setHotelId(booking.getRoom().getHotel().getHotelId());
+        dto.setHotelName(booking.getRoom().getHotel().getHotelName());
+        dto.setRoomType(booking.getRoom().getRoomType());
+        return dto;
+    }
 }
