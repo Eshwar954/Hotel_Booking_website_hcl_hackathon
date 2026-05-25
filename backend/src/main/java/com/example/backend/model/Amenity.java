@@ -1,4 +1,4 @@
-package com.hotelbooking.model;
+﻿package com.example.backend.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,3 +18,4 @@ public class Amenity {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 }
+

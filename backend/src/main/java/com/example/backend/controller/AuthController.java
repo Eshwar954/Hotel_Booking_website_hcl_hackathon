@@ -1,4 +1,4 @@
-package com.hotelbooking.controller;
+﻿package com.example.backend.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hotelbooking.dto.LoginRequestDto;
-import com.hotelbooking.dto.RegisterRequestDto;
+import com.example.backend.dto.LoginRequestDto;
+import com.example.backend.dto.RegisterRequestDto;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,3 +23,4 @@ public class AuthController {
         return ResponseEntity.ok("register stub");
     }
 }
+

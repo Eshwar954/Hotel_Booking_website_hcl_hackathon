@@ -1,4 +1,4 @@
-package com.hotelbooking.model;
+﻿package com.example.backend.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,3 +21,4 @@ public class Room {
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
 }
+

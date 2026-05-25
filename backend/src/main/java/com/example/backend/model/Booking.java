@@ -1,4 +1,4 @@
-package com.hotelbooking.model;
+﻿package com.example.backend.model;
 
 import java.time.LocalDate;
 
@@ -29,3 +29,4 @@ public class Booking {
     public LocalDate getToDate() { return toDate; }
     public void setToDate(LocalDate toDate) { this.toDate = toDate; }
 }
+

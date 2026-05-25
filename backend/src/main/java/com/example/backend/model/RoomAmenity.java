@@ -1,4 +1,4 @@
-package com.hotelbooking.model;
+﻿package com.example.backend.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,3 +21,4 @@ public class RoomAmenity {
     public Long getAmenityId() { return amenityId; }
     public void setAmenityId(Long amenityId) { this.amenityId = amenityId; }
 }
+

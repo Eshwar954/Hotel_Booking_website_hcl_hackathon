@@ -1,9 +1,8 @@
-package com.hotelbooking.service.impl;
+﻿package com.example.backend.service;
 
 import org.springframework.stereotype.Service;
-
-import com.hotelbooking.service.HotelService;
 
 @Service
 public class HotelServiceImpl implements HotelService {
 }
+

@@ -1,4 +1,4 @@
-package com.hotelbooking.model;
+﻿package com.example.backend.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,3 +24,4 @@ public class User {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 }
+
