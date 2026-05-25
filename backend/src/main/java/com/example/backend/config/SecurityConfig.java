@@ -14,21 +14,38 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http) throws Exception {
+
         http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable())
+
+                .cors(cors -> {
+                })
+
+                .sessionManagement(sm -> sm.sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS))
+
+                .authorizeHttpRequests(auth -> auth
+
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**")
+                        .permitAll()
+
+                        .anyRequest()
+                        .authenticated())
+
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -38,4 +55,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-

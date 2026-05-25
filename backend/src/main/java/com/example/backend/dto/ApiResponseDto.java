@@ -5,8 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AmenityDto {
-    private Long amenityId;
-    private String amenityName;
+public class ApiResponseDto {
+    private String message;
 }
-

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.backend.dto.BookingDto;
 import com.example.backend.dto.RoomDto;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.model.Booking;
 import com.example.backend.model.Room;
 import com.example.backend.model.User;
@@ -16,37 +17,50 @@ import com.example.backend.repository.RoomRepository;
 import com.example.backend.repository.UserRepository;
 
 @Service
-public class AdminServiceImpl implements AdminService {
+public class AdminServiceImpl
+		implements AdminService {
 
 	private final BookingRepository bookingRepository;
+
 	private final UserRepository userRepository;
+
 	private final RoomRepository roomRepository;
 
-	public AdminServiceImpl(BookingRepository bookingRepository, UserRepository userRepository, RoomRepository roomRepository) {
+	public AdminServiceImpl(
+			BookingRepository bookingRepository,
+			UserRepository userRepository,
+			RoomRepository roomRepository) {
+
 		this.bookingRepository = bookingRepository;
+
 		this.userRepository = userRepository;
+
 		this.roomRepository = roomRepository;
 	}
 
 	@Override
 	public Object getDashboard() {
-		long hotels = 0; // placeholder, can extend
+
 		long rooms = roomRepository.count();
+
 		long bookings = bookingRepository.count();
+
 		long users = userRepository.count();
-		return Map.of("rooms", rooms, "bookings", bookings, "users", users);
+
+		return Map.of(
+				"rooms", rooms,
+				"bookings", bookings,
+				"users", users);
 	}
 
 	@Override
 	public List<BookingDto> listBookings() {
-		return bookingRepository.findAll().stream().map(b -> {
-			BookingDto dto = new BookingDto();
-			dto.setUserId(b.getUserId());
-			dto.setRoomId(b.getRoomId());
-			dto.setFromDate(b.getFromDate());
-			dto.setToDate(b.getToDate());
-			return dto;
-		}).collect(Collectors.toList());
+
+		return bookingRepository
+				.findAll()
+				.stream()
+				.map(this::mapToBookingDto)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -55,16 +69,82 @@ public class AdminServiceImpl implements AdminService {
 	}
 
 	@Override
-	public RoomDto setRoomAvailability(Long roomId, boolean available) {
-		Room r = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
-		r.setAvailable(available);
-		Room saved = roomRepository.save(r);
+	public RoomDto updateRoomAvailability(
+			Long roomId,
+			Integer onlineAvailableRooms) {
+
+		Room room = roomRepository
+				.findById(roomId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"Room",
+						"id",
+						roomId));
+
+		room.setOnlineAvailableRooms(
+				onlineAvailableRooms);
+
+		Room saved = roomRepository.save(room);
+
+		return mapToRoomDto(saved);
+	}
+
+	private BookingDto mapToBookingDto(
+			Booking booking) {
+
+		BookingDto dto = new BookingDto();
+
+		dto.setBookingId(
+				booking.getBookingId());
+
+		dto.setUserId(
+				booking.getUser()
+						.getUserId());
+
+		dto.setRoomId(
+				booking.getRoom()
+						.getRoomId());
+
+		dto.setCheckInDate(
+				booking.getCheckInDate()
+						.toString());
+
+		dto.setCheckOutDate(
+				booking.getCheckOutDate()
+						.toString());
+
+		dto.setTotalPrice(
+				booking.getTotalPrice());
+
+		dto.setStatus(
+				booking.getStatus());
+
+		return dto;
+	}
+
+	private RoomDto mapToRoomDto(
+			Room room) {
+
 		RoomDto dto = new RoomDto();
-		dto.setId(saved.getId());
-		dto.setNumber(saved.getNumber());
-		dto.setPrice(saved.getPrice());
-		dto.setHotelId(saved.getHotelId());
-		dto.setAvailable(saved.getAvailable());
+
+		dto.setRoomId(
+				room.getRoomId());
+
+		dto.setHotelId(
+				room.getHotel()
+						.getHotelId());
+
+		dto.setRoomType(
+				room.getRoomType());
+
+		dto.setPrice(
+				room.getPrice());
+
+		dto.setOnlineAvailableRooms(
+				room.getOnlineAvailableRooms());
+
+		dto.setDescription(
+				room.getDescription());
+
 		return dto;
 	}
 }

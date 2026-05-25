@@ -5,8 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AmenityDto {
+public class RoomAmenityDto {
+    private Long roomId;
     private Long amenityId;
-    private String amenityName;
 }
-

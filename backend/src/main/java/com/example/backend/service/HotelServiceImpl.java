@@ -6,60 +6,158 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.dto.HotelDto;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.model.Hotel;
 import com.example.backend.repository.HotelRepository;
-import com.example.backend.exception.ResourceNotFoundException;
 
 @Service
-public class HotelServiceImpl implements HotelService {
+public class HotelServiceImpl
+		implements HotelService {
 
 	private final HotelRepository hotelRepository;
 
-	public HotelServiceImpl(HotelRepository hotelRepository) {
+	public HotelServiceImpl(
+			HotelRepository hotelRepository) {
 		this.hotelRepository = hotelRepository;
 	}
 
 	@Override
 	public List<HotelDto> listHotels() {
-		return hotelRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+
+		return hotelRepository
+				.findAll()
+				.stream()
+				.map(this::mapToDto)
+				.collect(Collectors.toList());
 	}
 
 	@Override
-	public HotelDto getHotel(Long id) {
-		Hotel h = hotelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Hotel", "id", id));
-		return toDto(h);
+	public HotelDto getHotel(
+			Long id) {
+
+		Hotel hotel = hotelRepository
+				.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"Hotel",
+						"id",
+						id));
+
+		return mapToDto(hotel);
 	}
 
 	@Override
-	public HotelDto createHotel(HotelDto dto) {
-		Hotel h = new Hotel();
-		h.setName(dto.getName());
-		h.setAddress(dto.getAddress());
-		Hotel saved = hotelRepository.save(h);
-		return toDto(saved);
+	public HotelDto createHotel(
+			HotelDto dto) {
+
+		Hotel hotel = new Hotel();
+
+		hotel.setHotelName(
+				dto.getHotelName());
+
+		hotel.setLocation(
+				dto.getLocation());
+
+		hotel.setDescription(
+				dto.getDescription());
+
+		hotel.setOwnerName(
+				dto.getOwnerName());
+
+		hotel.setOwnerEmail(
+				dto.getOwnerEmail());
+
+		hotel.setOwnerPhone(
+				dto.getOwnerPhone());
+
+		hotel.setImageUrl(
+				dto.getImageUrl());
+
+		Hotel savedHotel = hotelRepository.save(hotel);
+
+		return mapToDto(savedHotel);
 	}
 
 	@Override
-	public HotelDto updateHotel(Long id, HotelDto dto) {
-		Hotel h = hotelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Hotel", "id", id));
-		h.setName(dto.getName());
-		h.setAddress(dto.getAddress());
-		Hotel saved = hotelRepository.save(h);
-		return toDto(saved);
+	public HotelDto updateHotel(
+			Long id,
+			HotelDto dto) {
+
+		Hotel hotel = hotelRepository
+				.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"Hotel",
+						"id",
+						id));
+
+		hotel.setHotelName(
+				dto.getHotelName());
+
+		hotel.setLocation(
+				dto.getLocation());
+
+		hotel.setDescription(
+				dto.getDescription());
+
+		hotel.setOwnerName(
+				dto.getOwnerName());
+
+		hotel.setOwnerEmail(
+				dto.getOwnerEmail());
+
+		hotel.setOwnerPhone(
+				dto.getOwnerPhone());
+
+		hotel.setImageUrl(
+				dto.getImageUrl());
+
+		Hotel updatedHotel = hotelRepository.save(hotel);
+
+		return mapToDto(updatedHotel);
 	}
 
 	@Override
-	public void deleteHotel(Long id) {
-		Hotel h = hotelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Hotel", "id", id));
-		hotelRepository.delete(h);
+	public void deleteHotel(
+			Long id) {
+
+		Hotel hotel = hotelRepository
+				.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"Hotel",
+						"id",
+						id));
+
+		hotelRepository.delete(hotel);
 	}
 
-	private HotelDto toDto(Hotel h) {
+	private HotelDto mapToDto(
+			Hotel hotel) {
+
 		HotelDto dto = new HotelDto();
-		dto.setId(h.getId());
-		dto.setName(h.getName());
-		dto.setAddress(h.getAddress());
+
+		dto.setHotelId(
+				hotel.getHotelId());
+
+		dto.setHotelName(
+				hotel.getHotelName());
+
+		dto.setLocation(
+				hotel.getLocation());
+
+		dto.setDescription(
+				hotel.getDescription());
+
+		dto.setOwnerName(
+				hotel.getOwnerName());
+
+		dto.setOwnerEmail(
+				hotel.getOwnerEmail());
+
+		dto.setOwnerPhone(
+				hotel.getOwnerPhone());
+
+		dto.setImageUrl(
+				hotel.getImageUrl());
+
 		return dto;
 	}
 }
-

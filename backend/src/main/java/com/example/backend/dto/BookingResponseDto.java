@@ -6,13 +6,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BookingDto {
+public class BookingResponseDto {
     private Long bookingId;
-    private Long userId;
-    private Long roomId;
+    private String hotelName;
+    private String roomType;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private Double totalPrice;
     private String status;
 }
-

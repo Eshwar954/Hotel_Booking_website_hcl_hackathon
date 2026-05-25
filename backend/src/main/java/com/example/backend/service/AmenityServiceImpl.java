@@ -6,47 +6,131 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.dto.AmenityDto;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.model.Amenity;
+import com.example.backend.model.Room;
 import com.example.backend.model.RoomAmenity;
 import com.example.backend.repository.AmenityRepository;
 import com.example.backend.repository.RoomAmenityRepository;
+import com.example.backend.repository.RoomRepository;
 
 @Service
-public class AmenityServiceImpl implements AmenityService {
+public class AmenityServiceImpl
+        implements AmenityService {
 
-	private final AmenityRepository amenityRepository;
-	private final RoomAmenityRepository roomAmenityRepository;
+    private final AmenityRepository
+            amenityRepository;
 
-	public AmenityServiceImpl(AmenityRepository amenityRepository, RoomAmenityRepository roomAmenityRepository) {
-		this.amenityRepository = amenityRepository;
-		this.roomAmenityRepository = roomAmenityRepository;
-	}
+    private final RoomAmenityRepository
+            roomAmenityRepository;
 
-	@Override
-	public List<AmenityDto> listAmenities() {
-		return amenityRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
-	}
+    private final RoomRepository
+            roomRepository;
 
-	@Override
-	public AmenityDto createAmenity(AmenityDto dto) {
-		Amenity a = new Amenity();
-		a.setName(dto.getName());
-		Amenity saved = amenityRepository.save(a);
-		return toDto(saved);
-	}
+    public AmenityServiceImpl(
+            AmenityRepository amenityRepository,
+            RoomAmenityRepository roomAmenityRepository,
+            RoomRepository roomRepository
+    ) {
 
-	@Override
-	public void assignAmenityToRoom(Long roomId, Long amenityId) {
-		RoomAmenity ra = new RoomAmenity();
-		ra.setRoomId(roomId);
-		ra.setAmenityId(amenityId);
-		roomAmenityRepository.save(ra);
-	}
+        this.amenityRepository =
+                amenityRepository;
 
-	private AmenityDto toDto(Amenity a) {
-		AmenityDto dto = new AmenityDto();
-		dto.setId(a.getId());
-		dto.setName(a.getName());
-		return dto;
-	}
+        this.roomAmenityRepository =
+                roomAmenityRepository;
+
+        this.roomRepository =
+                roomRepository;
+    }
+
+    @Override
+    public List<AmenityDto>
+    listAmenities() {
+
+        return amenityRepository
+                .findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public AmenityDto createAmenity(
+            AmenityDto dto
+    ) {
+
+        Amenity amenity =
+                new Amenity();
+
+        amenity.setAmenityName(
+                dto.getAmenityName()
+        );
+
+        Amenity saved =
+                amenityRepository.save(
+                        amenity
+                );
+
+        return mapToDto(saved);
+    }
+
+    @Override
+    public void assignAmenityToRoom(
+            Long roomId,
+            Long amenityId
+    ) {
+
+        Room room =
+                roomRepository
+                        .findById(roomId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Room",
+                                        "id",
+                                        roomId
+                                )
+                        );
+
+        Amenity amenity =
+                amenityRepository
+                        .findById(amenityId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Amenity",
+                                        "id",
+                                        amenityId
+                                )
+                        );
+
+        RoomAmenity roomAmenity =
+                new RoomAmenity();
+
+        roomAmenity.setRoom(room);
+
+        roomAmenity.setAmenity(
+                amenity
+        );
+
+        roomAmenityRepository.save(
+                roomAmenity
+        );
+    }
+
+    private AmenityDto mapToDto(
+            Amenity amenity
+    ) {
+
+        AmenityDto dto =
+                new AmenityDto();
+
+        dto.setAmenityId(
+                amenity.getAmenityId()
+        );
+
+        dto.setAmenityName(
+                amenity.getAmenityName()
+        );
+
+        return dto;
+    }
 }
