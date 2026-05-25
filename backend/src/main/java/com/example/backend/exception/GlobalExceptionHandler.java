@@ -1,4 +1,4 @@
-package com.hotelbooking.exception;
+﻿package com.example.backend.exception;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
@@ -6,3 +6,4 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 public class GlobalExceptionHandler {
     // TODO: add exception handlers
 }
+

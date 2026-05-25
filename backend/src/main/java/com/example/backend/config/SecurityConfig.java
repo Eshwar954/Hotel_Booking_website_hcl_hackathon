@@ -1,4 +1,4 @@
-package com.hotelbooking.config;
+﻿package com.example.backend.config;
 
 import org.springframework.context.annotation.Configuration;
 
@@ -6,3 +6,4 @@ import org.springframework.context.annotation.Configuration;
 public class SecurityConfig {
     // TODO: configure security (JWT, CORS, etc.)
 }
+

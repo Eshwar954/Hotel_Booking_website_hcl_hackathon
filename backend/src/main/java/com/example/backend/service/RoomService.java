@@ -1,4 +1,5 @@
-package com.hotelbooking.service;
+﻿package com.example.backend.service;
 
 public interface RoomService {
 }
+

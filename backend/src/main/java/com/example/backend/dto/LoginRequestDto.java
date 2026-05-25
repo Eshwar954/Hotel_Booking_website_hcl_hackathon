@@ -1,4 +1,4 @@
-package com.hotelbooking.dto;
+﻿package com.example.backend.dto;
 
 public class LoginRequestDto {
     private String username;
@@ -9,3 +9,4 @@ public class LoginRequestDto {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 }
+

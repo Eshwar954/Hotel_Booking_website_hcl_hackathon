@@ -1,10 +1,9 @@
-package com.hotelbooking.service.impl;
+﻿package com.example.backend.service;
 
 import org.springframework.stereotype.Service;
-
-import com.hotelbooking.service.AuthService;
 
 @Service
 public class AuthServiceImpl implements AuthService {
     // TODO: implement auth service methods
 }
+

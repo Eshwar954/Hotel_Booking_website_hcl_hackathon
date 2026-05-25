@@ -1,4 +1,4 @@
-package com.hotelbooking.dto;
+﻿package com.example.backend.dto;
 
 public class RoomDto {
     private Long id;
@@ -12,3 +12,4 @@ public class RoomDto {
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
 }
+

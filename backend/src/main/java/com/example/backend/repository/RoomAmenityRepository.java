@@ -1,10 +1,11 @@
-package com.hotelbooking.repository;
+﻿package com.example.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.hotelbooking.model.RoomAmenity;
+import com.example.backend.model.RoomAmenity;
 
 @Repository
 public interface RoomAmenityRepository extends JpaRepository<RoomAmenity, Long> {
 }
+

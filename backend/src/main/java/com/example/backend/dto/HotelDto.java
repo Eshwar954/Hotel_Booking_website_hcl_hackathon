@@ -1,4 +1,4 @@
-package com.hotelbooking.dto;
+﻿package com.example.backend.dto;
 
 public class HotelDto {
     private Long id;
@@ -12,3 +12,4 @@ public class HotelDto {
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
 }
+

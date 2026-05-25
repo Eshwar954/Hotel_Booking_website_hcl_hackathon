@@ -1,5 +1,6 @@
-package com.hotelbooking.config;
+﻿package com.example.backend.config;
 
 public class JwtService {
     // TODO: implement token creation/validation
 }
+
