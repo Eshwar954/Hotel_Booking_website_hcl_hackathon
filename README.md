@@ -181,3 +181,12 @@ mvn test
 - H2 console enabled: `true`
 - JWT auth enabled
 - Seed data enabled automatically when the database is empty
+<img width="1600" height="900" alt="1000095987" src="https://github.com/user-attachments/assets/86e9a055-d360-4d86-bbaa-d74bd2c5d75b" />
+<img width="1600" height="900" alt="1000095982" src="https://github.com/user-attachments/assets/d3f9f4ef-fc4b-491b-be4f-7acb11c7c2fb" />
+<img width="1600" height="900" alt="1000095983" src="https://github.com/user-attachments/assets/04600dd8-4be9-404c-b54d-f31a3d14b5da" />
+<img width="1600" height="900" alt="1000095984" src="https://github.com/user-attachments/assets/d38d95b3-00ff-48ad-a341-2e922f38b11d" />
+<img width="1600" height="900" alt="1000095985" src="https://github.com/user-attachments/assets/702783c2-6e13-4b52-ba51-8f803f01e1fd" />
+<img width="1600" height="900" alt="1000095986" src="https://github.com/user-attachments/assets/a5b86229-ae93-477c-81ae-17ded4a4b6ef" />
+<img width="1600" height="900" alt="1000095988" src="https://github.com/user-attachments/assets/a7ad0cfc-4e7e-4d5d-afea-62a426e47a7d" />
+<img width="1600" height="900" alt="1000095989" src="https://github.com/user-attachments/assets/92a47ee2-0085-4a88-b089-a04e640f2d4b" />
+<img width="1600" height="900" alt="1000095990" src="https://github.com/user-attachments/assets/85ba0262-aeaa-441d-ac73-4b3c46f1d6c6" />
